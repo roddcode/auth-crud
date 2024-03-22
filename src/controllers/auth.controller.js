@@ -1,11 +1,14 @@
-import { compare } from "../libs/handleBcrypt.js"
-import User from "../models/user.model.js"
-import { createToken } from "../libs/jwt.js"
-import { encrypt } from "../libs/handleBcrypt.js"
+import { compare } from '../libs/handleBcrypt.js'
+import User from '../models/user.model.js'
+import { createToken } from '../libs/jwt.js'
+import { encrypt } from '../libs/handleBcrypt.js'
 
 export const register = async (req, res) => {
   const { username, email, password } = req.body
   try {
+    const userFound = await User.findOne({ email })
+    if (userFound)
+      return res.status(400).json(['user already exists'])
     const passwordHash = await encrypt(password)
 
     const newUser = new User({
@@ -16,14 +19,16 @@ export const register = async (req, res) => {
 
     const userSaved = await newUser.save()
     const token = createToken(userSaved._id)
-    
-    res.cookie("token", token)
-    res.json({ message: "user created successfully" })
 
+    res.cookie('token', token)
+    res.json({
+      id: userSaved._id,
+      username: userSaved.username,
+      email: userSaved.email,
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
-  
 }
 
 export const login = async (req, res) => {
@@ -31,23 +36,28 @@ export const login = async (req, res) => {
 
   try {
     const userFound = await User.findOne({ email })
-    if (!userFound) return res.status(400).json({ message: "user not found" })
+    if (!userFound) return res.status(400).json({ message: 'user not found' })
 
     const isMatch = await compare(password, userFound.password)
 
-    if (!isMatch) return res.status(400).json({ message: "invalid credentials" })
+    if (!isMatch)
+      return res.status(400).json({ message: 'invalid credentials' })
 
     const token = createToken(userFound._id)
-    res.cookie("token", token)
-    res.json({ id: userFound._id, username: userFound.username, email: userFound.email })
+    res.cookie('token', token)
+    res.json({
+      id: userFound._id,
+      username: userFound.username,
+      email: userFound.email,
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
-} 
+}
 
 export const logout = (req, res) => {
-  res.clearCookie("token")
-  res.json({ message: "user logged out" })
+  res.clearCookie('token')
+  res.json({ message: 'user logged out' })
 }
 
 export const profile = async (req, res) => {
