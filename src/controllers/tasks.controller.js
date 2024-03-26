@@ -6,7 +6,7 @@ export const createTask = async (req, res) => {
     title,
     description,
     completedAt,
-    user: req.user._id,
+    user: req.user.id,
   })
   const savedTask = await newTask.save()
   res.json(savedTask)
@@ -14,7 +14,7 @@ export const createTask = async (req, res) => {
 
 export const getTasks = async (req, res) => {
   const tasks = await Task.find({
-    user: req.user._id,
+    user: req.user.id,
   }).populate('user')
   res.json(tasks)
 }

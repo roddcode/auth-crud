@@ -20,7 +20,7 @@ const Login = () => {
     if (isAuth) navigate('/tasks')
   }, [isAuth])
   return (
-    <div className='min-h-screen flex justify-center items-center text-lg mx-2'>
+    <div className=' flex justify-center items-center text-lg mx-2'>
       <form onSubmit={onSubmit} className='form p-4'>
         <div className='flex flex-col gap-4 text-center mb-2'>
           <h2 className='text-5xl text-white font-semibold mb-2'>Login</h2>
